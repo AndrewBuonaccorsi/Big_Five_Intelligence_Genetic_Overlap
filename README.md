@@ -1,1 +1,4 @@
 # Big_Five_Intelligence_Genetic_Overlap
+The scripts folder contains all code used in our main and supplementary analyses. The scripts are separated into folders by analysis, and each one contains a README file which explains briefly what each script does.
+
+data contains gene sets, gene coordinates, and the excluded genes lists, which are necessary to run any script which uses a gene-level block jackknife. Most data necessary to run our analyses are not included in this file, specifically the GWAS summary statistics for the Big Five and intelligence, and all of the gene sets we used that we did not create ourselves. Big Five summary statistics can be obtained from https://osf.io/hgnsm/files/osfstorage. Intelligence summary statistics can be obtained from https://vu.data.surf.nl/index.php/s/9tgwxmO5yosQkmb. Gene set sources are described in the MAGMA part of our methods section.
