@@ -1,0 +1,11 @@
+01_big_five_rg.sh
+
+Gets genetic correlations between the Big Five and many other traits, with and without controlling for intelligence. It uses GenomicSEM to explicitly test the significance of the change before and after the control.
+
+personality-genetic-corr.R
+
+This is the script run by 01_big_five_rg.sh.
+
+iq_as_covar_plot.R
+
+Takes the results of both previous scripts and generates a plot.

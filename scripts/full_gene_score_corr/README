@@ -1,0 +1,11 @@
+5_gene_corr.sh
+
+Runs the two subsequent scripts.
+
+gene_corr_no_jk.R
+
+Computes the Pearson correlation of MAGMA gene Z-scores.
+
+gene_zstat_correlation.
+
+Computes the Pearson correlation of MAGMA gene Z-scores over 200 jackknife iterations and returns standard errors.

@@ -1,0 +1,67 @@
+00_add_Pvalues.sh
+
+Add a P column to munged sumstats based on their Z-score.
+
+01_magma_annotate.sh
+
+Use NCBI build 37.3 gene locations to map SNPs to genes.
+
+02_magma_gene_analysis
+
+Create gene scores from summary statistics and snp-gene map.
+
+03_magma_merge
+
+Merge all chromosomes of the above.
+
+04_magma_geneset.sh
+
+Get gene set enrichments from merged gene scores.
+
+3_magma_jack.sh
+
+Get gene set enrichmetns from merged gene scores for 200 jackknife iterations. Excluded gene blocks can be found in the data directory.
+
+4_enrich_corr_jack.sh
+
+Calculates Pearson enrichment correlations for the 200 jackknife iterations.
+
+5_gene_correlations.sh
+
+Calculates Pearson gene score correlations for the 200 jackknife iterations.
+
+6_gene_corr_no_jk.sh
+
+Calculates Pearson gene score correlations with no excluded genes.
+
+7_non_jk_enrich_corr.sh
+
+Calculates Pearson enrichment correlations with no excluded genes.
+
+add_P.R
+
+This script is run by 00_add_Pvalues.sh
+
+gene_corr_no_jk.R
+
+This script is run by 6_gene_corr_no_jk.sh.
+
+gene_zstat_correlation.R
+
+This script is run by 5_gene_correlations.sh.
+
+mean_N.R
+
+Calculates the mean sample size across all SNPs for a sumstats file. It also returns other quantities like minimum, maximum, and median.
+
+unweighted_enrich_corr_njk.R
+
+This script is run by 7_non_jk_enrich_corr.sh.
+
+unweighted_enrich_corr.R
+
+This script is run by 4_enrich_corr_jack.sh.
+
+render_paired_figure.R
+
+Creates figure comparing same-trait and cross-trait gene set enrichment correlations across collections. Also run as part of the SEM pipeline.

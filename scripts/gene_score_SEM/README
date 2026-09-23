@@ -1,0 +1,54 @@
+analysis.R
+
+Main entry point that runs the whole pipeline and calls the scripts below.
+
+
+
+gene_score_analysis.R
+
+Computes the gene-score correlations, their jackknife covariance, and the two main SEMs.
+
+
+
+gene_set_enrichment_sem.R
+
+Fits the same SEMs to the gene set enrichment correlations.
+
+
+
+equal_loading_wald_test.R
+
+Tests whether the paired trait loadings can be held equal.
+
+
+
+free_split_half_loadings.R
+
+Refits the models with every trait loading estimated separately. This script generates the main results ultimately included in the paper.
+
+
+
+split_half_ratio_models.R
+
+Refits the models allowing the two split-half loadings per trait to differ by a ratio.
+
+
+
+split_half_design_simulation.R
+
+Simulates the split-half design to check that the models recover the right answer.
+
+
+render_paired_figure.R
+
+Draws the same-trait versus cross-trait gene set correlation figure.
+
+
+build_gene_score_workbook.mjs
+
+Writes the gene-score results into a formatted Excel workbook.
+
+
+build_paper_results_workbook.mjs
+
+Writes the paper's results tables into a formatted Excel workbook.

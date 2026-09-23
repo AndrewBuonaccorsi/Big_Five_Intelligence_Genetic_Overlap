@@ -1,0 +1,7 @@
+enrich_diff.R
+
+This script takes .gsa.out files for the Big Five and intelligence over all collections and makes a six-panel plot of the enrichment of each trait against the mean of the other five traits.
+
+9_enrich_diff.sh
+
+This script runs the previous one.

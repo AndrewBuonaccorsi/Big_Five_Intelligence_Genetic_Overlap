@@ -1,0 +1,48 @@
+1_setup_mixer.sh
+
+Installs the MiXeR Singularity container and downloads the LD reference files.
+
+
+
+1.1_setup_add_jaccard.sh
+
+Patches the MiXeR code to also report the Jaccard index alongside the Dice coefficient.
+
+
+
+mixer_uni.sh
+
+Fits the univariate model to each trait, in 20 replicates.
+
+
+
+mixer_bi.sh
+
+Runs the bivariate model on every personality-IQ and every trait-height pair.
+
+
+
+mixer_bi_2.sh
+
+Runs the bivariate model on the remaining pairs, the Big Five against each other.
+
+
+
+collate_personality_results.sh
+
+Combines the replicates and makes the Venn diagrams and QQ plots.
+
+
+
+analyze_mixer_results.R
+
+Converts the combined output into SNP counts and overlap summaries.
+
+
+figures.ipynb
+
+Reference notebook from the MiXeR authors showing how their plotting functions work.
+
+mixer_plot.R
+
+Create final Venn diagram plots for paper.

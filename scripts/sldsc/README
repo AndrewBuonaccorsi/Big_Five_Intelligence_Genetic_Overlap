@@ -1,0 +1,19 @@
+01_sldsc_make_annot.sh
+
+Creates annotations based on input gene set files. Ours can be found in the data directory. Requires a gene coordinate file, which we also have in our data directory, and LD reference panels.
+
+create_gene_coords.R
+
+Makes the gene coordinate file, based on our MAGMA snp2gene annotation, so using NCBI build 37.3 gene locations.
+
+02_make_ld_scores.sh
+
+Creates LD scores from the annotations. Requires a SNP list.
+
+03_partitioned_heritability.sh
+
+Calculates S-LDSC enrichments for each gene set.
+
+combined_sldsc_plot.R
+
+Creates combined plot of S-LDSC enrichments on BrainSpan and GTEx gene sets.

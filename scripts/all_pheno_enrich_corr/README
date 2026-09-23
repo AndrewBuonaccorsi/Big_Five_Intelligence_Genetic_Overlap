@@ -1,0 +1,27 @@
+00_add_Pvalues.sh
+
+Converts Z scores to p-values. Necessary for munged sumstats that lack a P column before they can be used for MAGMA.
+
+01_magma_annotate.sh
+
+Creates a file annotating SNPs to genes.
+
+02_magma_gene_analysis.sh
+
+Produces gene scores from summary statistics and the snploc file.
+
+03_magma_merge.sh
+
+Merges all chromosomes from the previous.
+
+04_magma_geneset.sh
+
+Produces gene set enrichments from merged gene scores.
+
+add_P.R
+
+This is the script used by 00_add_Pvalues.sh
+
+unweighted_heatmap.R
+
+Takes the output from 04 and calculates enrichment correlations, then produces heatmap PDFs for each gene set collection.
