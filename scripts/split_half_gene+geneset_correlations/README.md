@@ -18,11 +18,18 @@
 | --- | --- |
 | [01_gene_scores.R](01_gene_scores.R) | Gene-score correlations and jackknife uncertainty. |
 | [02_gene_sets.R](02_gene_sets.R) | Gene-set correlations, reliability regressions, and the paired figure. |
-| [03_closed_form_correlations.R](03_closed_form_correlations.R) | Closed-form latent correlations for all 15 trait pairs in gene scores and pooled gene sets; group means and their difference, with direct block-jackknife SEs. |
+| [03_closed_form_correlations.R](03_closed_form_correlations.R) | Closed-form latent correlations for all 15 trait pairs in gene scores, pooled gene sets, and each gene-set collection; group means and their difference, with direct block-jackknife SEs. |
 | [04_sem.R](04_sem.R) | Correlated-trait and hierarchical SEMs, fit diagnostics, and jackknife uncertainty. |
 
 Script 03 writes its tables and `closed_form_correlations.xlsx` workbook to
 `output/closed_form_correlations/`.
+
+It reads both pooled `inputs.rds` files and `output/gene_sets/collection_inputs.rds`.
+The `collection` column distinguishes `all_genes`, `pooled`, and individual
+gene-set collections. Group means require all 10 Big Five pairs or all five
+IQ–Big Five pairs; undefined pairs are not dropped. SEs require every one of
+the 200 deletions to be defined. Defined-pair and valid-deletion counts are
+reported, and out-of-range correlations and means are retained and flagged.
 
 ## Additional scripts
 

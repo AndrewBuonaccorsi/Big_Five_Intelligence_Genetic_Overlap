@@ -3,21 +3,30 @@
 # Closed-form latent correlations from saved gene-score and gene-set inputs.
 
 # ==============================================================================
-# Load the two saved correlation inputs
+# Load gene-score, pooled gene-set and collection-specific correlation inputs
 # ==============================================================================
 
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 pacman::p_load(tidyverse, writexl)
 
 dir.create("output/closed_form_correlations", recursive = TRUE, showWarnings = FALSE)
-paths <- c(gene_scores = "output/gene_scores/inputs.rds", gene_sets = "output/gene_sets/inputs.rds")
-inputs <- map(paths, readRDS)
+paths <- c(gene_scores = "output/gene_scores/inputs.rds", gene_sets = "output/gene_sets/inputs.rds",
+           collections = "output/gene_sets/collection_inputs.rds")
+inputs <- map(paths[c("gene_scores", "gene_sets")], readRDS)
+collections <- readRDS(paths[["collections"]])
 stopifnot(identical(inputs$gene_scores$block_hashes, inputs$gene_sets$block_hashes),
-          identical(inputs$gene_scores$indicators, inputs$gene_sets$indicators))
+          identical(inputs$gene_scores$indicators, inputs$gene_sets$indicators),
+          identical(inputs$gene_sets$correlation, collections$correlations$pooled),
+          identical(inputs$gene_sets$jackknife, collections$jackknife$pooled))
 traits <- inputs$gene_scores$traits
 trait_pairs <- t(combn(1:6, 2))
 pair_names <- paste(traits[trait_pairs[, 1]], traits[trait_pairs[, 2]], sep = "__")
 iq_pair <- trait_pairs[, 2] == 6
+
+# Keep the original pooled input and append each collection exactly once.
+inputs <- c(inputs, imap(collections$correlations[names(collections$correlations) != "pooled"],
+  \(r, collection) list(correlation = r, jackknife = collections$jackknife[[collection]],
+                         pairs = inputs$gene_sets$pairs)))
 
 # ==============================================================================
 # Closed-form latent correlations and group contrasts
@@ -58,7 +67,10 @@ group_correlations <- function(rho) {
     difference_iq_minus_big_five = mean(rho[iq_pair]) - mean(rho[!iq_pair]))
 }
 
-results <- imap(inputs, \(input, analysis) {
+results <- imap(inputs, \(input, input_name) {
+  analysis <- if (input_name == "gene_scores") "gene_scores" else "gene_sets"
+  collection <- case_when(input_name == "gene_scores" ~ "all_genes",
+                          input_name == "gene_sets" ~ "pooled", TRUE ~ input_name)
   stopifnot(nrow(input$jackknife) == 200, all(is.finite(input$jackknife)))
   point <- closed_form_correlations(input$correlation)
   deleted <- map_dfr(1:200, \(block) {
@@ -66,13 +78,17 @@ results <- imap(inputs, \(input, analysis) {
     r[input$pairs] <- r[input$pairs[, 2:1]] <- input$jackknife[block, ]
     pair_estimates <- closed_form_correlations(r)
     groups <- enframe(group_correlations(pair_estimates$estimate), "quantity", "estimate") |>
-      mutate(status = if_else(is.finite(estimate), "ok", "undefined_group"))
+      mutate(status = case_when(!is.finite(estimate) ~ "undefined_group",
+        quantity != "difference_iq_minus_big_five" & abs(estimate) > 1 ~ "outside_correlation_bounds",
+        TRUE ~ "ok"))
     bind_rows(pair_estimates, groups) |> mutate(block = block, .before = 1)
   })
   point <- bind_rows(
     point,
     enframe(group_correlations(point$estimate), "quantity", "estimate") |>
-      mutate(status = if_else(is.finite(estimate), "ok", "undefined_group"))
+      mutate(status = case_when(!is.finite(estimate) ~ "undefined_group",
+        quantity != "difference_iq_minus_big_five" & abs(estimate) > 1 ~ "outside_correlation_bounds",
+        TRUE ~ "ok"))
   )
   summary <- deleted |>
     group_by(quantity) |>
@@ -87,10 +103,11 @@ results <- imap(inputs, \(input, analysis) {
       .groups = "drop"
     ) |>
     right_join(point, by = "quantity") |>
-    mutate(analysis = analysis, .before = 1,
+    mutate(analysis = analysis, collection = collection, .before = 1,
            standard_error = if_else(is.finite(estimate), standard_error, NA_real_),
            se_status = if_else(is.finite(standard_error), "complete_200_blocks", "unavailable"))
-  list(summary = summary, jackknife = mutate(deleted, analysis = analysis, .before = 1))
+  list(summary = summary,
+       jackknife = mutate(deleted, analysis = analysis, collection = collection, .before = 1))
 })
 
 # ==============================================================================
@@ -99,12 +116,24 @@ results <- imap(inputs, \(input, analysis) {
 
 summary <- map(results, "summary") |> list_rbind()
 correlations <- summary |> filter(quantity %in% pair_names)
+pair_counts <- correlations |>
+  group_by(analysis, collection) |>
+  summarise(defined_big_five = sum(is.finite(estimate[!str_detect(quantity, "__iq$")])),
+            defined_iq = sum(is.finite(estimate[str_detect(quantity, "__iq$")])),
+            .groups = "drop")
 groups <- summary |>
   filter(!quantity %in% pair_names) |>
-  mutate(lower = estimate - qnorm(.975) * standard_error,
+  left_join(pair_counts, by = c("analysis", "collection")) |>
+  mutate(required_pairs = case_when(quantity == "mean_big_five" ~ 10L,
+                                    quantity == "mean_iq_big_five" ~ 5L, TRUE ~ 15L),
+         defined_pairs = case_when(quantity == "mean_big_five" ~ defined_big_five,
+                                   quantity == "mean_iq_big_five" ~ defined_iq,
+                                   TRUE ~ defined_big_five + defined_iq),
+         lower = estimate - qnorm(.975) * standard_error,
          upper = estimate + qnorm(.975) * standard_error,
          p_value = if_else(quantity == "difference_iq_minus_big_five" & standard_error > 0,
-                           2 * pnorm(-abs(estimate / standard_error)), NA_real_))
+                           2 * pnorm(-abs(estimate / standard_error)), NA_real_)) |>
+  select(-defined_big_five, -defined_iq)
 write_csv(correlations, "output/closed_form_correlations/correlations.csv")
 write_csv(groups, "output/closed_form_correlations/group_comparison.csv")
 write_csv(map(results, "jackknife") |> list_rbind(), "output/closed_form_correlations/jackknife.csv")
