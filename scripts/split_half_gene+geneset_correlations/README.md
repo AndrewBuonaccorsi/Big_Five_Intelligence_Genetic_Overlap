@@ -18,8 +18,11 @@
 | --- | --- |
 | [01_gene_scores.R](01_gene_scores.R) | Gene-score correlations and jackknife uncertainty. |
 | [02_gene_sets.R](02_gene_sets.R) | Gene-set correlations, reliability regressions, and the paired figure. |
-| [03_analytic_correlations.R](03_analytic_correlations.R) | Analytic latent correlations and comparisons between trait groups. |
+| [03_closed_form_correlations.R](03_closed_form_correlations.R) | Closed-form latent correlations for all 15 trait pairs in gene scores and pooled gene sets; group means and their difference, with direct block-jackknife SEs. |
 | [04_sem.R](04_sem.R) | Correlated-trait and hierarchical SEMs, fit diagnostics, and jackknife uncertainty. |
+
+Script 03 writes its tables and `closed_form_correlations.xlsx` workbook to
+`output/closed_form_correlations/`.
 
 ## Additional scripts
 

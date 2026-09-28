@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+# Closed-form latent correlations from saved gene-score and gene-set inputs.
+
 # ==============================================================================
 # Load the two saved correlation inputs
 # ==============================================================================
@@ -7,7 +9,7 @@
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 pacman::p_load(tidyverse, writexl)
 
-dir.create("output/analytic_correlations", recursive = TRUE, showWarnings = FALSE)
+dir.create("output/closed_form_correlations", recursive = TRUE, showWarnings = FALSE)
 paths <- c(gene_scores = "output/gene_scores/inputs.rds", gene_sets = "output/gene_sets/inputs.rds")
 inputs <- map(paths, readRDS)
 stopifnot(identical(inputs$gene_scores$block_hashes, inputs$gene_sets$block_hashes),
@@ -18,10 +20,10 @@ pair_names <- paste(traits[trait_pairs[, 1]], traits[trait_pairs[, 2]], sep = "_
 iq_pair <- trait_pairs[, 2] == 6
 
 # ==============================================================================
-# Analytic latent correlations and group contrasts
+# Closed-form latent correlations and group contrasts
 # ==============================================================================
 
-analytic_correlations <- function(r) {
+closed_form_correlations <- function(r) {
   a <- trait_pairs[, 1]
   b <- trait_pairs[, 2]
   reliability_a <- r[cbind(2 * a - 1, 2 * a)]
@@ -58,11 +60,11 @@ group_correlations <- function(rho) {
 
 results <- imap(inputs, \(input, analysis) {
   stopifnot(nrow(input$jackknife) == 200, all(is.finite(input$jackknife)))
-  point <- analytic_correlations(input$correlation)
+  point <- closed_form_correlations(input$correlation)
   deleted <- map_dfr(1:200, \(block) {
     r <- input$correlation
     r[input$pairs] <- r[input$pairs[, 2:1]] <- input$jackknife[block, ]
-    pair_estimates <- analytic_correlations(r)
+    pair_estimates <- closed_form_correlations(r)
     groups <- enframe(group_correlations(pair_estimates$estimate), "quantity", "estimate") |>
       mutate(status = if_else(is.finite(estimate), "ok", "undefined_group"))
     bind_rows(pair_estimates, groups) |> mutate(block = block, .before = 1)
@@ -103,13 +105,13 @@ groups <- summary |>
          upper = estimate + qnorm(.975) * standard_error,
          p_value = if_else(quantity == "difference_iq_minus_big_five" & standard_error > 0,
                            2 * pnorm(-abs(estimate / standard_error)), NA_real_))
-write_csv(correlations, "output/analytic_correlations/correlations.csv")
-write_csv(groups, "output/analytic_correlations/group_comparison.csv")
-write_csv(map(results, "jackknife") |> list_rbind(), "output/analytic_correlations/jackknife.csv")
+write_csv(correlations, "output/closed_form_correlations/correlations.csv")
+write_csv(groups, "output/closed_form_correlations/group_comparison.csv")
+write_csv(map(results, "jackknife") |> list_rbind(), "output/closed_form_correlations/jackknife.csv")
 write_csv(tibble(path = unname(paths), md5 = unname(tools::md5sum(paths))),
-          "output/analytic_correlations/sources.csv")
+          "output/closed_form_correlations/sources.csv")
 write_xlsx(list(correlations = correlations, group_comparison = groups),
-           "output/analytic_correlations/analytic_correlations.xlsx")
-writeLines(capture.output(sessionInfo()), "output/analytic_correlations/session_info.txt")
+           "output/closed_form_correlations/closed_form_correlations.xlsx")
+writeLines(capture.output(sessionInfo()), "output/closed_form_correlations/session_info.txt")
 print(correlations)
 print(groups)
