@@ -30,6 +30,11 @@ gene-set collections. Group means require all 10 Big Five pairs or all five
 IQ–Big Five pairs; undefined pairs are not dropped. SEs require every one of
 the 200 deletions to be defined. Defined-pair and valid-deletion counts are
 reported, and out-of-range correlations and means are retained and flagged.
+Each group mean and their difference receives a two-sided approximate normal
+p-value against zero when its jackknife SE is positive and finite; these
+p-values are not adjusted for multiple comparisons. The collection IDs match
+the 22 collections in the reliability figure, which labels only eight of them
+and displays observed rather than reliability-corrected correlations.
 
 ## Additional scripts
 

@@ -131,7 +131,8 @@ groups <- summary |>
                                    TRUE ~ defined_big_five + defined_iq),
          lower = estimate - qnorm(.975) * standard_error,
          upper = estimate + qnorm(.975) * standard_error,
-         p_value = if_else(quantity == "difference_iq_minus_big_five" & standard_error > 0,
+         # Two-sided approximate normal tests of each mean or difference against zero.
+         p_value = if_else(is.finite(estimate) & is.finite(standard_error) & standard_error > 0,
                            2 * pnorm(-abs(estimate / standard_error)), NA_real_)) |>
   select(-defined_big_five, -defined_iq)
 write_csv(correlations, "output/closed_form_correlations/correlations.csv")
