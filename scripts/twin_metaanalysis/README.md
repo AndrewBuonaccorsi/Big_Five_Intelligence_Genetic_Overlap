@@ -1,0 +1,5 @@
+# Twin meta-analysis
+
+| Script | Purpose |
+| --- | --- |
+| [twin_meta.R](twin_meta.R) | This script has the genetic correlations and sample sizes of the four studies we metaanalyze. It takes a weighted average of each Big Five trait's genetic correlation with intelligence, by the total number of twins in the study (not pairs). |

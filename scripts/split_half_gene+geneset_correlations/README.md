@@ -12,7 +12,7 @@
 | [04_magma_geneset.sh](04_magma_geneset.sh) | Get gene set enrichments from merged gene scores. |
 | [3_magma_jack.sh](3_magma_jack.sh) | Get gene set enrichmetns from merged gene scores for 200 jackknife iterations. Excluded gene blocks can be found in the data directory. |
 
-## Current analyses
+## Correlations and SEM
 
 | Script | Purpose |
 | --- | --- |
