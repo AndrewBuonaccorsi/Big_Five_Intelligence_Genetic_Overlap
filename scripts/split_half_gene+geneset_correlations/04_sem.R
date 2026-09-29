@@ -418,7 +418,7 @@ groups <- estimates |>
   filter(quantity %in% c("mean_big_five", "mean_iq_big_five", "difference_iq_minus_big_five")) |>
   mutate(lower = estimate - qnorm(.975) * standard_error,
          upper = estimate + qnorm(.975) * standard_error,
-         p_value = if_else(quantity == "difference_iq_minus_big_five" & standard_error > 0,
+         p_value = if_else(is.finite(estimate) & is.finite(standard_error) & standard_error > 0,
                            2 * pnorm(-abs(estimate / standard_error)), NA_real_))
 write_csv(fit_summary, "output/sem/fit_summary.csv")
 write_csv(estimates, "output/sem/estimates.csv")

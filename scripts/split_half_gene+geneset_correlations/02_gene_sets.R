@@ -5,7 +5,7 @@
 # ==============================================================================
 
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
-pacman::p_load(tidyverse, data.table, fixest, ggrepel, writexl)
+pacman::p_load(tidyverse, data.table, fixest, ggrepel, ggthemes, writexl)
 
 dir.create("output/gene_sets", recursive = TRUE, showWarnings = FALSE)
 traits <- c("agree", "consc", "extra", "neurot", "open", "iq")
@@ -202,29 +202,54 @@ collection_labels <- c(
 )
 figure <- collection_summary |>
   pivot_longer(c(iq_big_five, big_five), names_to = "series", values_to = "correlation") |>
-  mutate(series = recode(series, iq_big_five = "IQ-Big Five", big_five = "Big Five-Big Five")) |>
+  arrange(match(series, c("iq_big_five", "big_five"))) |>
+  mutate(series = factor(recode(series, iq_big_five = "IQ - Big Five",
+                               big_five = "Big Five - Big Five"),
+                         levels = c("Big Five - Big Five", "IQ - Big Five"))) |>
   ggplot(aes(reliability, correlation)) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey65") +
-  geom_line(aes(group = collection), colour = "grey65") +
-  geom_point(aes(colour = series, shape = series), size = 3) +
+  geom_abline(slope = 1, intercept = 0, linetype = 2, colour = "#A3A3A3", linewidth = .65) +
+  geom_segment(data = collection_summary,
+               aes(x = reliability, xend = reliability, y = iq_big_five, yend = big_five),
+               inherit.aes = FALSE, colour = "#A3A3A3", linewidth = .65) +
+  geom_point(aes(colour = series), size = 4.4) +
   geom_label_repel(
     data = collection_summary |>
       mutate(midpoint = (iq_big_five + big_five) / 2) |>
-      pivot_longer(c(iq_big_five, big_five, midpoint), names_to = "position", values_to = "y") |>
+      pivot_longer(c(midpoint, iq_big_five, big_five), names_to = "position", values_to = "y") |>
+      arrange(match(position, c("midpoint", "iq_big_five", "big_five"))) |>
       mutate(label = if_else(position == "midpoint" & collection %in% names(collection_labels),
                              collection_labels[collection], "")),
     aes(x = reliability, y = y, label = label),
-    inherit.aes = FALSE, size = 3.5, max.overlaps = Inf, seed = 1,
-    box.padding = .8, point.padding = .5, min.segment.length = 0,
-    colour = "#30414D", fill = "#F1F7FB", show.legend = FALSE
+    inherit.aes = FALSE, size = 4.4, seed = 20260729,
+    box.padding = .7, label.padding = grid::unit(.18, "lines"), point.padding = 0,
+    label.r = grid::unit(.2, "lines"), linewidth = .22, min.segment.length = 0,
+    force = 4, force_pull = .25, max.time = 8, max.iter = 100000,
+    max.overlaps = Inf, direction = "both", fill = scales::alpha("#EAF7FC", .92),
+    colour = "#30414D", segment.color = scales::alpha("#71838F", .82),
+    segment.size = .45, show.legend = FALSE
   ) +
-  scale_colour_manual(values = c("Big Five-Big Five" = "#0072B2", "IQ-Big Five" = "#D55E00")) +
-  labs(x = "Mean same-trait enrichment correlation",
-       y = "Mean cross-trait enrichment correlation", colour = NULL, shape = NULL) +
-  theme_classic(base_size = 12) +
-  theme(legend.position = "bottom")
-ggsave("output/gene_sets/reliability_overlap.pdf", figure, width = 10, height = 8)
-ggsave("output/gene_sets/reliability_overlap.png", figure, width = 10, height = 8, dpi = 200)
+  scale_colour_manual(values = c("Big Five - Big Five" = "#2C7FB8", "IQ - Big Five" = "#D95F02"),
+                      drop = FALSE) +
+  labs(x = "Average same-trait gene set correlation",
+       y = "Average cross-trait gene set correlation", colour = NULL) +
+  scale_x_continuous(expand = expansion(mult = c(.10, .06))) +
+  scale_y_continuous(expand = expansion(mult = c(.12, .06))) +
+  coord_fixed(ratio = 1) +
+  ggthemes::theme_foundation(base_size = 17, base_family = "sans") +
+  theme(
+    panel.background = element_rect(fill = "white", colour = NA),
+    plot.background = element_rect(fill = "white", colour = NA),
+    panel.border = element_rect(colour = NA),
+    axis.title = element_text(face = "bold"), axis.line = element_line(colour = "black"),
+    panel.grid.major = element_line(colour = "#f0f0f0"), panel.grid.minor = element_blank(),
+    legend.background = element_rect(fill = scales::alpha("white", .88), colour = NA),
+    legend.key = element_rect(fill = "white", colour = NA),
+    legend.position = "inside", legend.position.inside = c(.03, .97),
+    legend.justification.inside = c(0, 1), legend.direction = "vertical",
+    legend.title.position = "top", legend.margin = margin(5, 7, 5, 7)
+  )
+ggsave("output/gene_sets/reliability_overlap.pdf", figure, width = 8.2, height = 7.4)
+ggsave("output/gene_sets/reliability_overlap.png", figure, width = 8.2, height = 7.4, dpi = 240)
 
 # ==============================================================================
 # Save paper tables and the collection-level results
